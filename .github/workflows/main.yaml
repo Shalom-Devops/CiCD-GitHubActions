@@ -25,7 +25,6 @@ jobs:
           cache: maven
       - name: Build with Maven
         run: mvn clean install
-      - name: SonarQube Analysis
       - name: Install SonarQube Scanner
         run: |
           wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}.zip
