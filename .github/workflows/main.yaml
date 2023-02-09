@@ -35,7 +35,7 @@ jobs:
       with:
         name: target/*.jar
         path: target/*.jar
-	    - name: SonarQube Scan
+    - name: SonarQube Scan
       uses: sonarsource/sonarqube-scan-action@master
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
