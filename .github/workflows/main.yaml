@@ -44,7 +44,7 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Pull Docker image
       run: |
-        docker pull ${IMAGE_NAME}:${Tag} 
+        docker pull pavan9999/github-actions:moonpage
     - name: Scan image for vulnerabilities
       run: |
         docker run --rm aquasec/trivy:0.13.0 --exit-code 1 --severity UNKNOWN,LOW,MEDIUM,HIGH --no-progress ${IMAGE_NAME}
