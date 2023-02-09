@@ -27,20 +27,17 @@ jobs:
           cache: maven
       - name: Build with Maven
         run: mvn clean install
-      - name: Install SonarQube Scanner
-        run: |
-          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}.zip
-          unzip sonar-scanner-cli-${SONAR_SCANNER_VERSION}.zip
-          rm sonar-scanner-cli-${SONAR_SCANNER_VERSION}.zip
-
-      - name: Run SonarQube Scan
-        run: |
-          export SONAR_SCANNER_OPTS="-Xmx512m"
-          ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
-          -Dsonar.projectKey=pavan-gadapu \
-          -Dsonar.sources=. \
-          -Dsonar.host.url=https://sonarcloud.io/ \
-          -Dsonar.login=2217d69b7b99caebbb4c645410e75ae3a5aa8b34
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      - name: SonarQube Quality Gate check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        # Force to fail step after specific time
+        timeout-minutes: 5
+        env:
+         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: Dependency-Check (SCA)
         run: |
            wget https://github.com/jeremylong/DependencyCheck/releases/download/v6.0.5/dependency-check-6.0.5-release.zip
