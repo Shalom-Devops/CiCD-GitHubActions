@@ -7,6 +7,11 @@ on:
   pull_request:
     branches:
       - main
+env:
+  IMAGE_NAME: pavan9999/github-actions
+  Tag: moonpage
+  JMETER_VERSION: 5.4
+  JMETER_HOME: /opt/jmeter-${JMETER_VERSION}
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,8 +28,8 @@ jobs:
       - name: Build & push Docker image
         uses: mr-smithers-excellent/docker-build-push@v5
         with:
-          image: pavan9999/github-actions
-          tags: moonpage
+          image: ${IMAGE_NAME}
+          tags: ${Tag}
           registry: docker.io
           dockerfile: Dockerfile
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -39,7 +44,7 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Pull Docker image
       run: |
-        docker pull pavan9999/github-actions:moonpage
+        docker pull ${IMAGE_NAME}:${Tag} 
     - name: Scan image for vulnerabilities
       run: |
         docker run --rm aquasec/trivy:0.13.0 --exit-code 1 --severity UNKNOWN,LOW,MEDIUM,HIGH --no-progress ${IMAGE_NAME}
@@ -49,3 +54,29 @@ jobs:
         name: trivy-scan-results
         path: |
           scan-results.txt
+  jmeter-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: 11
+        
+    - name: Install Apache JMeter
+      run: |
+        wget https://downloads.apache.org/jmeter/binaries/apache-jmeter-${JMETER_VERSION}.tgz
+        tar -xf apache-jmeter-${JMETER_VERSION}.tgz
+        rm apache-jmeter-${JMETER_VERSION}.tgz
+
+    - name: Run Apache JMeter test
+      run: |
+        ${JMETER_HOME}/bin/jmeter -n -t test.jmx -l results.jtl
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v2
+      with:
+        name: jmeter-test-results
+        path: results.jtl
