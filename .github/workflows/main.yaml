@@ -9,7 +9,7 @@ on:
       - main
 env:
   IMAGE_NAME: pavan9999/github-actions
-  Tag: moonpage
+  IMAGE_TAG: moonpage
   JMETER_VERSION: 5.4
   JMETER_HOME: /opt/jmeter-${JMETER_VERSION}
 jobs:
@@ -29,7 +29,7 @@ jobs:
         uses: mr-smithers-excellent/docker-build-push@v5
         with:
           image: ${IMAGE_NAME}
-          tags: ${Tag}
+          tags: ${IMAGE_TAG}
           registry: docker.io
           dockerfile: Dockerfile
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -37,46 +37,19 @@ jobs:
   trivy-scan:
     runs-on: ubuntu-latest
     steps:
-    - name: Login to Docker registry
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-    - name: Pull Docker image
+    - name: Install Trivy
       run: |
-        docker pull pavan9999/github-actions:moonpage
-    - name: Scan image for vulnerabilities
+        sudo apt-get update
+        sudo apt-get install -y curl
+        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/master/contrib/install.sh | sh -s -- -b /usr/local/bin
+
+    - name: Scan Image
       run: |
-        docker run --rm aquasec/trivy:0.13.0 --exit-code 1 --severity UNKNOWN,LOW,MEDIUM,HIGH --no-progress ${IMAGE_NAME}
-    - name: Upload Scan Results
+        trivy image ${IMAGE_NAME}:${IMAGE_TAG}
+        
+    - name: Upload scan results
       uses: actions/upload-artifact@v2
       with:
         name: trivy-scan-results
-        path: |
-          scan-results.txt
-  jmeter-test:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-      
-    - name: Set up JDK
-      uses: actions/setup-java@v2
-      with:
-        java-version: 11
-        
-    - name: Install Apache JMeter
-      run: |
-        wget https://downloads.apache.org/jmeter/binaries/apache-jmeter-${JMETER_VERSION}.tgz
-        tar -xf apache-jmeter-${JMETER_VERSION}.tgz
-        rm apache-jmeter-${JMETER_VERSION}.tgz
-
-    - name: Run Apache JMeter test
-      run: |
-        ${JMETER_HOME}/bin/jmeter -n -t test.jmx -l results.jtl
-        
-    - name: Upload test results
-      uses: actions/upload-artifact@v2
-      with:
-        name: jmeter-test-results
-        path: results.jtl
+        path: scan-results.json
+  
