@@ -8,6 +8,8 @@ on:
     branches:
       - main
 env:
+  SONAR_SCANNER_VERSION: 4.4.0.2170
+  SONAR_SCANNER_HOME: /opt/sonar-scanner-${SONAR_SCANNER_VERSION}
   IMAGE_NAME: pavan9999/github-actions
   IMAGE_TAG: moonpage
   JMETER_VERSION: 5.4
