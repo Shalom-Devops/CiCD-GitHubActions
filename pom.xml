@@ -18,4 +18,11 @@
   <build>
     <finalName>MoonPageWebApp</finalName>
   </build>
+  <properties>
+     <sonar.organization>pavansadhika</sonar.organization>
+     <sonar.projectKey>pavansadhika_CiCD-GitHubActions</sonar.projectKey>
+     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+     <sonar.projectVersion>1.0</sonar.projectVersion>
+     <sonar.sources>src/main/webapp</sonar.sources>
+  </properties>
 </project>
