@@ -51,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: Dependency check report
-          path: ${{github.workspace}}/reports
+          path: ${github.workspace}/reports
         #JUNIT TESTING
       - name: Junit-Test Stage
         run: mvn test
@@ -86,7 +86,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: trivy-scan-results
-          path: scan-results.json
+          path: /home/runner/work/CiCD-GitHubActions/CiCD-GitHubActions/*
   
   jmeter-test:
     needs: build
@@ -111,4 +111,4 @@ jobs:
        uses: actions/upload-artifact@v2
        with:
           name: jmeter-test-results
-          path: /home/runner/work/cicd-github-actions/cicd-github-actions/results.jtl
+          path: /home/runner/work/CiCD-GitHubActions/CiCD-GitHubActions/*
