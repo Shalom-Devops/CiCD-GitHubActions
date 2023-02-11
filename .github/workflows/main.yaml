@@ -21,7 +21,7 @@ jobs:
           java-version: "1.8"
           distribution: adopt
           cache: maven
-      - name: Build Stage
+      #Build Stage
       - name: Build with Maven 
         run: mvn clean install  
        #SonarQube-Scaning and code quality && Coverage
