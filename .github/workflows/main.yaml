@@ -25,7 +25,9 @@ jobs:
           cache: maven
       - name: Build with Maven
         run: mvn clean install
-        
+  SonarQube-Analysis:
+    runs-on: ubuntu-latest
+    steps:   
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
         env:
@@ -37,6 +39,9 @@ jobs:
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  Dependency-Check:
+    runs-on: ubuntu-latest
+    steps:
       - name: Dependency-Check (SCA)
         run: |
           wget https://github.com/jeremylong/DependencyCheck/releases/download/v6.0.5/dependency-check-6.0.5-release.zip
@@ -77,3 +82,27 @@ jobs:
           name: trivy-scan-results
           path: scan-results.json
   
+  jmeter-test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+     - name: Checkout code
+       uses: actions/checkout@v2
+     - name: Setup Java
+       uses: actions/setup-java@v1
+       with:
+          java-version: 11
+     - name: Download and extract JMeter
+       run: |
+         curl -L https://downloads.apache.org/jmeter/binaries/apache-jmeter-5.5.zip -o jmeter.zip
+         unzip jmeter.zip
+
+     - name: Run JMeter test
+       run: |
+         ./apache-jmeter-5.5/bin/jmeter -n -t test.jmx -l result.jtl
+
+     - name: Upload test results    
+       uses: actions/upload-artifact@v2
+       with:
+          name: jmeter-test-results
+          path: /home/runner/work/cicd-github-actions/cicd-github-actions/results.jtl
