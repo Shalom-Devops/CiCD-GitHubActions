@@ -23,12 +23,11 @@ jobs:
           java-version: "1.8"
           distribution: adopt
           cache: maven
-      - name: Build with Maven
-        run: mvn clean install
-  SonarQube-Analysis:
-    runs-on: ubuntu-latest
-    steps:   
-      - name: SonarQube Scan
+      - name: Build Stage
+      - name: Build with Maven 
+        run: mvn clean install  
+       #SonarQube-Scaning and code quality && Coverage
+      - name: SonarQube-Scan Stage
         uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -39,10 +38,8 @@ jobs:
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  Dependency-Check:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dependency-Check (SCA)
+        #Dependency-Check(Security Composition Analysis)
+      - name: Dependency-Check(SCA) Stage
         run: |
           wget https://github.com/jeremylong/DependencyCheck/releases/download/v6.0.5/dependency-check-6.0.5-release.zip
            unzip dependency-check-6.0.5-release.zip
@@ -57,7 +54,17 @@ jobs:
         with:
           name: Dependency check report
           path: ${{github.workspace}}/reports
-
+        #JUNIT TESTING
+      - name: Junit-Test Stage
+        run: mvn test
+      - name: Upload JUnit Test Results
+        uses: actions/upload-artifact@v2
+        with:
+          name: junit-results
+          path: /home/runner/work/CiCD-GitHubActions/CiCD-GitHubActions/*
+      - name: Publish JUnit Test Report
+        run: echo "JUnit test results uploaded successfully."
+       #Docker Image Build && Push
       - name: Docker-Image-Build & Push
         uses: mr-smithers-excellent/docker-build-push@v5
         with:
@@ -67,6 +74,7 @@ jobs:
           dockerfile: Dockerfile
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      #Docker Image Scanning
       - name: Install Trivy 
         run: |
          sudo apt-get update
