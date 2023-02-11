@@ -10,8 +10,6 @@ on:
 env:
   IMAGE_NAME: pavan9999/github-actions
   IMAGE_TAG: moonpage
-  JMETER_VERSION: 5.4
-  JMETER_HOME: /opt/jmeter-${JMETER_VERSION}
 jobs:
   build:
     runs-on: ubuntu-latest
