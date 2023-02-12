@@ -50,8 +50,8 @@ jobs:
       - name: Upload Test results
         uses: actions/upload-artifact@master
         with:
-          name: Dependency check report
-          path: ${github.workspace}/reports
+          name: DependencyCheck-report
+          path: /home/runner/work/CiCD-GitHubActions/CiCD-GitHubActions/*
         #JUNIT TESTING
       - name: Junit-Test Stage
         run: mvn test
@@ -87,9 +87,54 @@ jobs:
         with:
           name: trivy-scan-results
           path: /home/runner/work/CiCD-GitHubActions/CiCD-GitHubActions/*
+  #Junit Testing
+  Test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+
+    - name: Build and Test
+      run: mvn test
+
+    - name: Upload JUnit Test Results
+      uses: actions/upload-artifact@v2
+      with:
+        name: junit-results
+        path: /home/runner/work/CiCD-GitHubActions/CiCD-GitHubActions/*
+
+    - name: Publish JUnit Test Report
+      run: echo "JUnit test results uploaded successfully."
+  deploy:
+    env:
+      AWS_REGION: us-east-1
+      ECS_CLUSTER: ECS-Cluster
+      ECS_SERVICE: github-svc
+      ECS_TASK_DEFINITION: github-task
+    needs: Test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+    - name: Deploy to Amazon ECS
+      run: |
+        aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{env.ECS_SERVICE}} --task-definition ${{ env.ECS_TASK_DEFINITION }}
   
   jmeter-test:
-    needs: build
+    needs: deploy 
     runs-on: ubuntu-latest
     steps:
      - name: Checkout code
@@ -105,10 +150,10 @@ jobs:
 
      - name: Run JMeter test
        run: |
-         ./apache-jmeter-5.5/bin/jmeter -n -t test.jmx -l result.jtl
+         ./apache-jmeter-5.5/bin/jmeter -n -t test.jmx -l jmeter-test-result.jtl
 
      - name: Upload test results    
        uses: actions/upload-artifact@v2
        with:
-          name: jmeter-test-results
+          name: jmeter-test-result
           path: /home/runner/work/CiCD-GitHubActions/CiCD-GitHubActions/*
