@@ -24,6 +24,10 @@ jobs:
       #Build Stage
       - name: Build with Maven 
         run: mvn clean install  
+      - name: Verify Token
+        uses: actions/verify-token@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
        #SonarQube-Scaning and code quality && Coverage
       - name: SonarQube-Scan Stage
         uses: sonarsource/sonarqube-scan-action@master
