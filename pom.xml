@@ -10,7 +10,6 @@
 
     <build>
       <finalName>MoonPageWebApp</finalName>
-    </build>
                <plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -32,6 +31,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
+	   </build>
          <dependencies>
 		<dependency>
 			<groupId>junit</groupId>
