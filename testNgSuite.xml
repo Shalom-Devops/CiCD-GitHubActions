@@ -2,7 +2,7 @@
 <suite name="Selenium-Test-cases">
     <test name="MoonPage">
         <classes>
-            <class name="MoonPageTest" />
+            <class name="MoontestTest" />
         </classes>
     </test>
 
